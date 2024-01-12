@@ -1,6 +1,6 @@
-import "express-async-errors"
 import "dotenv/config";
 import express from "express";
+import "express-async-errors"
 import { startDatabase } from "./database.js";
 import { routes } from "./Routes/index.routes.js"
 import { handleErrors } from "./Middlewares/handleErrors.middlewares.js";
@@ -20,4 +20,3 @@ app.listen(PORT, async () => {
   await startDatabase();
   console.log(`app running on port: ${PORT}`);
 });
-
