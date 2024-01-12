@@ -1,4 +1,5 @@
-import { Client } from "@vercel/postgres";
+import pkg from 'pg';
+const { Client } = pkg;
 
 export const client = new Client({
   user: process.env.DB_USER,

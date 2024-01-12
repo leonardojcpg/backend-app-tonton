@@ -1,5 +1,5 @@
 import format from 'pg-format';
-import { sql } from '@vercel/postgres';
+import { client } from '../database.js';
 import AppError from '../Errors/App.error.js';
 
 export const createBreastFeedingService = async (data) => {
@@ -10,7 +10,7 @@ export const createBreastFeedingService = async (data) => {
       Object.values(data)
     );
 
-    const queryResult = await sql`${queryFormat}`;
+    const queryResult = await client.query(queryFormat);
     return queryResult.rows[0];
   } catch (error) {
     throw new AppError('Error creating breast feeding:', error);
@@ -20,7 +20,7 @@ export const createBreastFeedingService = async (data) => {
 export const listBreastFeedingService = async () => {
   try {
     const listBreastFeedingQuery = 'SELECT * FROM "breast_feeding";';
-    const listBreastFeedingQueryResult = await sql`${listBreastFeedingQuery}`;
+    const listBreastFeedingQueryResult = await client.query(listBreastFeedingQuery);
     return listBreastFeedingQueryResult.rows;
   } catch (error) {
     throw new AppError('Error fetching breast feedings from the database');
@@ -30,7 +30,7 @@ export const listBreastFeedingService = async () => {
 export const listBreastFeedingByIdService = async (breastFeedingId) => {
   try {
     const query = 'SELECT * FROM "breast_feeding" WHERE id = $1;';
-    const result = await sql`${query}${[breastFeedingId]}`;
+    const result = await client.query(query, [breastFeedingId]);
 
     if (result.rows.length === 0) {
       return null;
@@ -51,7 +51,7 @@ export const updateBreastFeedingService = async (breastFeedingId, data) => {
       Object.values(data)
     );
 
-    const updateBreastFeedingQueryResult = await sql`${updateBreastFeedingQueryFormat}${[breastFeedingId]}`;
+    const updateBreastFeedingQueryResult = await client.query(updateBreastFeedingQueryFormat, [breastFeedingId]);
     return updateBreastFeedingQueryResult.rows[0];
   } catch (error) {
     throw new AppError('Error updating breast feeding:', error);
@@ -64,7 +64,7 @@ export const deleteBreastFeedingService = async (breastFeedingId) => {
       'DELETE FROM "breast_feeding" WHERE "id" = $1 RETURNING *;'
     );
 
-    const deleteBreastFeedingQueryResult = await sql`${deleteBreastFeedingQuery}${[breastFeedingId]}`;
+    const deleteBreastFeedingQueryResult = await client.query(deleteBreastFeedingQuery, [breastFeedingId]);
     return deleteBreastFeedingQueryResult.rows[0];
   } catch (error) {
     throw new AppError('Error deleting breast feeding:', error);

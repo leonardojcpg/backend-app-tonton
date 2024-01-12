@@ -1,24 +1,16 @@
 import AppError from "../Errors/App.error.js";
-import { sql } from "@vercel/postgres";
+import { client } from "../database.js";
 
 export const associateUserBabyService = async (userId, babyId) => {
-  const insertUserBabyQuery = sql`
-    INSERT INTO "user_baby" (user_id, baby_id)
-    VALUES (${userId}, ${babyId})
-    ON CONFLICT DO NOTHING;
-  `;
-  await insertUserBabyQuery;
+  const query =
+    'INSERT INTO "user_baby" (user_id, baby_id) VALUES ($1, $2) ON CONFLICT DO NOTHING;';
+  await client.query(query, [userId, babyId]);
 
-  const updateBabyQuery = sql`
-    UPDATE "baby" SET user_id = ${userId}
-    WHERE id = ${babyId};
-  `;
-  await updateBabyQuery;
+  const updateBabyQuery = 'UPDATE "baby" SET user_id = $1 WHERE id = $2;';
+  await client.query(updateBabyQuery, [userId, babyId]);
 
-  const babyQuery = sql`
-    SELECT * FROM "baby" WHERE id = ${babyId};
-  `;
-  const babyResult = await babyQuery;
+  const babyQuery = 'SELECT * FROM "baby" WHERE id = $1;';
+  const babyResult = await client.query(babyQuery, [babyId]);
 
   if (babyResult.rows.length === 0) {
     throw new AppError("Baby not found.");
@@ -29,10 +21,8 @@ export const associateUserBabyService = async (userId, babyId) => {
 
 export const listBabyIdForUserService = async (userId) => {
   try {
-    const query = sql`
-      SELECT baby_id FROM "user_baby" WHERE user_id = ${userId};
-    `;
-    const result = await query;
+    const query = 'SELECT baby_id FROM "user_baby" WHERE user_id = $1;';
+    const result = await client.query(query, [userId]);
 
     if (result.rows.length === 0) {
       throw new AppError("Baby not found for the given user.");
@@ -45,8 +35,6 @@ export const listBabyIdForUserService = async (userId) => {
 };
 
 export const disassociateUserBabyService = async (userId, babyId) => {
-  const query = sql`
-    DELETE FROM "user_baby" WHERE user_id = ${userId} AND baby_id = ${babyId};
-  `;
-  await query;
+  const query = 'DELETE FROM "user_baby" WHERE user_id = $1 AND baby_id = $2;';
+  await client.query(query, [userId, babyId]);
 };

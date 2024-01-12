@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { sql } from "@vercel/postgres";
+import { client } from "../database.js";
 import AppError from "../Errors/App.error.js";
 import bcrypt from 'bcryptjs';
 
@@ -7,7 +7,10 @@ const { compare } = bcrypt;
 const { sign } = jwt;
 
 export const loginService = async (data) => {
-  const loginQuery = await sql`SELECT * FROM "users" WHERE "email" = ${data.email};`;
+  const loginQuery = await client.query(
+    'SELECT * FROM "users" WHERE "email" = $1;',
+    [data.email]
+  );
 
   if (loginQuery.rowCount === 0) {
     throw new AppError("Email does not exist.", 404);
