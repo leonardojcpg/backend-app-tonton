@@ -1,12 +1,11 @@
-import pkg from 'pg';
-const { Client } = pkg;
+// database.js
+import { Client } from '@vercel/postgres';
 
 export const client = new Client({
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
-  database: process.env.DB,
-  port: Number(process.env.DB_PORT),
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 export const startDatabase = async () => {
