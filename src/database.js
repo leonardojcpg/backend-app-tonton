@@ -1,7 +1,6 @@
-// database.js
-import { Client } from '@vercel/postgres';
+import { createPool } from '@vercel/postgres';
 
-export const client = new Client({
+export const pool = createPool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false,
@@ -10,8 +9,9 @@ export const client = new Client({
 
 export const startDatabase = async () => {
   try {
-    await client.connect();
+    const client = await pool.connect();
     console.log('Connected to the database!');
+    client.release(); // Release the client back to the pool immediately after connecting
   } catch (error) {
     console.error('Error connecting to the database:', error.message);
   }

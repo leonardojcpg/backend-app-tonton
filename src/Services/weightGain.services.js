@@ -1,6 +1,13 @@
-import format from "pg-format";
-import { client } from "../database.js";
-import AppError from "../Errors/App.error.js";
+import format from 'pg-format';
+import { createPool } from '@vercel/postgres';
+import AppError from '../Errors/App.error.js';
+
+const pool = createPool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 
 export const addWeightGainService = async (data) => {
   try {
@@ -10,33 +17,29 @@ export const addWeightGainService = async (data) => {
       Object.values(data)
     );
 
-    const queryResult = await client.query(queryFormat);
+    const queryResult = await pool.query(queryFormat);
     return queryResult.rows[0];
   } catch (error) {
-    console.error("Error adding weight history:", error);
-    throw new AppError("Error adding weight history");
+    console.error('Error adding weight history:', error);
+    throw new AppError('Error adding weight history');
   }
 };
 
-export const getWeightGainService = async (babyId) => {
+export const getWeightGainService = async () => {
   try {
-    const queryFormat = format(
-      'SELECT * FROM "weight_gain" ORDER BY "date" DESC;',
-      babyId
-    );
-
-    const queryResult = await client.query(queryFormat);
+    const queryFormat = 'SELECT * FROM "weight_gain" ORDER BY "date" DESC;';
+    const queryResult = await pool.query(queryFormat);
     return queryResult.rows;
   } catch (error) {
-    console.error("Error fetching weight history:", error);
-    throw new AppError("Error fetching weight history");
+    console.error('Error fetching weight history:', error);
+    throw new AppError('Error fetching weight history');
   }
 };
 
 export const getWeightGainByIdService = async (babyId) => {
   try {
     if (babyId === null || babyId === undefined) {
-      throw new AppError("Invalid babyId parameter");
+      throw new AppError('Invalid babyId parameter');
     }
 
     const queryFormat = format(
@@ -44,11 +47,11 @@ export const getWeightGainByIdService = async (babyId) => {
       babyId
     );
 
-    const queryResult = await client.query(queryFormat);
+    const queryResult = await pool.query(queryFormat);
     return queryResult.rows;
   } catch (error) {
-    console.error("Error fetching weight history:", error);
-    throw new AppError("Error fetching weight history");
+    console.error('Error fetching weight history:', error);
+    throw new AppError('Error fetching weight history');
   }
 };
 
@@ -62,7 +65,7 @@ export const updateWeightGainService = async (weightGainId, data) => {
       RETURNING *;
     `;
 
-    const queryResult = await client.query(queryFormat, [
+    const queryResult = await pool.query(queryFormat, [
       baby_id,
       weight,
       date,
@@ -75,8 +78,8 @@ export const updateWeightGainService = async (weightGainId, data) => {
 
     return queryResult.rows[0];
   } catch (error) {
-    console.error("Error updating weight history:", error);
-    throw new AppError("Error updating weight history");
+    console.error('Error updating weight history:', error);
+    throw new AppError('Error updating weight history');
   }
 };
 
@@ -87,10 +90,10 @@ export const deleteWeightGainService = async (weightGainId) => {
       weightGainId
     );
 
-    const queryResult = await client.query(queryFormat);
+    const queryResult = await pool.query(queryFormat);
     return queryResult.rows[0];
   } catch (error) {
-    console.error("Error deleting weight history:", error);
-    throw new AppError("Error deleting weight history");
+    console.error('Error deleting weight history:', error);
+    throw new AppError('Error deleting weight history');
   }
 };

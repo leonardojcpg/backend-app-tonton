@@ -1,5 +1,12 @@
-import { client } from "../database.js";
-import AppError from "../Errors/App.error.js";
+import { createPool } from '@vercel/postgres';
+import AppError from '../Errors/App.error.js';
+
+const pool = createPool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 
 export const createDiaperService = async (data) => {
   try {
@@ -9,28 +16,27 @@ export const createDiaperService = async (data) => {
       VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
-    const result = await client.query(query, [baby_id, label, size, quantity]);
+    const result = await pool.query(query, [baby_id, label, size, quantity]);
     return result.rows[0];
   } catch (error) {
-    throw new AppError("Error creating diaper record", error);  
+    throw new AppError('Error creating diaper record', error);
   }
 };
-
 
 export const listDiapersService = async () => {
   try {
     const query = 'SELECT * FROM "diapers";';
-    const result = await client.query(query);
+    const result = await pool.query(query);
     return result.rows;
   } catch (error) {
-    throw new AppError("Error fetching diaper records from the database", error);
+    throw new AppError('Error fetching diaper records from the database', error);
   }
 };
 
 export const listDiapersByIdService = async (diaperId) => {
   try {
     const query = 'SELECT * FROM "diapers" WHERE id = $1;';
-    const result = await client.query(query, [diaperId]);
+    const result = await pool.query(query, [diaperId]);
 
     if (result.rows.length === 0) {
       return null;
@@ -38,7 +44,7 @@ export const listDiapersByIdService = async (diaperId) => {
 
     return result.rows[0];
   } catch (error) {
-    throw new AppError("Error fetching diaper record by ID", error);
+    throw new AppError('Error fetching diaper record by ID', error);
   }
 };
 
@@ -51,7 +57,7 @@ export const updateDiaperByIdService = async (diaperId, data) => {
       WHERE id = $5
       RETURNING *;
     `;
-    const result = await client.query(query, [baby_id, label, size, quantity, diaperId]);
+    const result = await pool.query(query, [baby_id, label, size, quantity, diaperId]);
 
     if (result.rows.length === 0) {
       return null;
@@ -59,14 +65,14 @@ export const updateDiaperByIdService = async (diaperId, data) => {
 
     return result.rows[0];
   } catch (error) {
-    throw new AppError("Error updating diaper record by ID", error);
+    throw new AppError('Error updating diaper record by ID', error);
   }
 };
 
 export const deleteDiaperByIdService = async (diaperId) => {
   try {
     const query = 'DELETE FROM "diapers" WHERE id = $1 RETURNING *;';
-    const result = await client.query(query, [diaperId]);
+    const result = await pool.query(query, [diaperId]);
 
     if (result.rows.length === 0) {
       return null;
@@ -74,6 +80,6 @@ export const deleteDiaperByIdService = async (diaperId) => {
 
     return result.rows[0];
   } catch (error) {
-    throw new AppError("Error deleting diaper record by ID", error);
+    throw new AppError('Error deleting diaper record by ID', error);
   }
 };

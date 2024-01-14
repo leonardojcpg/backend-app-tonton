@@ -1,18 +1,30 @@
-import AppError from "../Errors/App.error.js"
-import { client } from "../database.js"
+import { createPool } from '@vercel/postgres';
+import AppError from '../Errors/App.error.js';
 
-export const verifyUserId = async(req, res, next) =>{
-    const {userId} = req.params
+const pool = createPool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
 
-    const queryResult = await client.query(
-        'SELECT * FROM "users" WHERE "id" = $1',
-        [userId]
-    )
-    if(!queryResult.rowCount){
-        throw new AppError("Client not found")
+export const verifyUserId = async (req, res, next) => {
+  const { userId } = req.params;
+
+  try {
+    const queryResult = await pool.query(
+      'SELECT * FROM "users" WHERE "id" = $1',
+      [userId]
+    );
+
+    if (!queryResult.rowCount) {
+      throw new AppError('Client not found');
     }
-    const foundClient = queryResult.rows[0]
-    res.locals = {...res.locals, foundClient}
-    return next()
-    
-}
+
+    const foundClient = queryResult.rows[0];
+    res.locals = { ...res.locals, foundClient };
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+};
