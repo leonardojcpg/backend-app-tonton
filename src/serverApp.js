@@ -6,9 +6,16 @@ import { routes } from "./Routes/index.routes.js"
 import { handleErrors } from "./Middlewares/handleErrors.middlewares.js";
 import cors from 'cors';
 
+const corsOptions = {
+  origin: 'https://tonton-one.vercel.app/register',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
 
 export const app = express();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use("/", routes)
