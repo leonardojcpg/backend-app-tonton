@@ -14,7 +14,6 @@ export const userRoutes = Router();
 
 userRoutes.get("/", verifyToken, listUsersController);
 userRoutes.post("/", createUserController);
-userRoutes.post("/register", createUserController);
 
 userRoutes.use("/:userId", verifyToken, verifyPermission, verifyUserId);
 userRoutes.get("/:userId", verifyUserId, listUsersByIdController);
