@@ -77,17 +77,9 @@ export const updateBabyService = async (babyId, data) => {
 
 export const deleteBabyService = async (babyId) => {
   try {
-    const checkBabyQuery = format('SELECT 1 FROM "baby" WHERE "id" = $1;');
-    const checkBabyQueryResult = await pool.query(checkBabyQuery, [babyId]);
-
-    if (checkBabyQueryResult.rows.length === 0) {
-      throw new AppError('Baby not found for deletion');
-    }
-
-    const deleteBabyQuery = format('DELETE FROM "baby" WHERE "id" = $1 RETURNING *;');
+    const deleteBabyQuery = format('DELETE FROM "baby" WHERE "id" = $1;');
     const deleteBabyQueryResult = await pool.query(deleteBabyQuery, [babyId]);
-
-    return { success: true };
+    return deleteBabyQueryResult.rows[0];
   } catch (error) {
     console.error('Error deleting baby:', error);
     throw new AppError('Error deleting baby');
